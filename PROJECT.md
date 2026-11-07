@@ -92,4 +92,39 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - Denying permission shows a clear message and a retry button
 - npm run build and npm run lint pass
 
-Do not start Phase 3.
+---
+
+# PHASE 3: Police flow (frontend only, no backend yet)
+
+## Steps
+1. Create src/data/incidentTypes.js (id, label, icon, severity):
+   Harassment, Stalking / being followed, Theft / chain snatching,
+   Kidnapping attempt, Physical assault, Group threat (3-4 people), Other.
+2. Update Police.jsx as a 3-step flow with a progress indicator:
+   Step 1: Location (LocationCard from Phase 2)
+   Step 2: Choose incident type (IncidentPicker component, big tappable tiles)
+   Step 3: Confirm screen with location, incident type, time,
+           and a "Confirm complaint" button. Back button on each step.
+3. Always show a big "Call 112" button (tel:112) and "Women helpline 1091" (tel:1091).
+4. Nearest police stations: create src/services/places.js that queries the
+   Overpass API (OpenStreetMap, amenity=police) within 5 km of the user,
+   sorts by distance, returns name, distance, lat, lng.
+   Show the top 3 with a "Navigate" button (Google Maps directions link)
+   and a "Call" button if a phone tag exists.
+   Handle loading, error and "none found" states.
+5. Create src/services/alerts.js with sendAlert(alert):
+   - Alert object: { id, type: "police", category, lat, lng, accuracy, timestamp }
+   - For now, save to localStorage under "aegis_alerts" and return success.
+   - If VITE_TEST_MODE=true, show banner "TEST MODE: no real alert sent".
+   - Leave a clear TODO comment where the backend API call goes in Phase 4.
+6. After confirming, show a Success screen: "Complaint registered (saved locally)",
+   alert ID, buttons "Call 112" and "Back to home".
+7. Mobile-first, Aegis branding, simple commented code.
+
+## Done when
+- Police flow works end to end: location, incident type, confirm, success
+- Nearest police stations list appears with distance
+- Alert saved in localStorage (DevTools > Application)
+- npm run build and npm run lint pass
+
+Do not start Phase 4.
