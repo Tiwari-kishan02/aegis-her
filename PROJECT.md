@@ -127,4 +127,53 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - Alert saved in localStorage (DevTools > Application)
 - npm run build and npm run lint pass
 
-Do not start Phase 4.
+---
+
+# PHASE 4: Backend (FastAPI) + real alerts
+
+## Steps
+1. Create a /backend folder (Python FastAPI) with this structure:
+   backend/app/main.py, models.py, database.py, schemas.py,
+   routes/ (auth.py, contacts.py, alerts.py), services/sms.py,
+   backend/requirements.txt, backend/.env.example, backend/README.md
+2. Database: SQLAlchemy. Use DATABASE_URL from .env.
+   Default to SQLite (sqlite:///./aegis.db) for easy local dev,
+   code must also work with PostgreSQL by changing DATABASE_URL.
+   Tables: users (id, phone, name, created_at),
+   contacts (id, user_id, name, phone),
+   alerts (id, user_id, type [police|ambulance|cab], category, lat, lng,
+   accuracy, status, created_at).
+3. Auth (simple, dev-friendly):
+   - POST /auth/request-otp {phone}: generates a 6-digit OTP, stores it with
+     5-minute expiry. In TEST_MODE it only prints the OTP in the server console.
+   - POST /auth/verify-otp {phone, otp}: returns a JWT access token
+     (python-jose), creates user if new.
+   - Rate limit OTP requests (max 3 per 10 minutes per phone).
+4. Contacts: GET/POST/DELETE /contacts (JWT protected), max 5 per user,
+   validate Indian phone numbers.
+5. Alerts: POST /alerts (JWT protected) saves the alert and sends SMS to the
+   user's trusted contacts with a Google Maps link
+   (https://maps.google.com/?q=lat,lng) and the alert type.
+   GET /alerts returns the current user's alerts.
+6. services/sms.py: Twilio integration. If TEST_MODE=true (default), do NOT send;
+   only log "[TEST MODE] SMS to <phone>: <message>". Keys come from .env only.
+7. Add CORS for http://localhost:5173, and a GET /health endpoint.
+8. Frontend changes:
+   - Create src/services/api.js (base URL from VITE_API_URL, attaches token).
+   - Create Login page (phone, OTP steps), and a Contacts page (add/remove contacts).
+     Add routes /login and /contacts, and links from Home header.
+   - Update sendAlert() in alerts.js to call POST /alerts.
+     If user is not logged in or the backend is unreachable, fall back to
+     localStorage and show "Saved offline, will not notify contacts".
+9. Write backend/README.md with exact run commands for Windows PowerShell:
+   python -m venv venv, venv\Scripts\activate, pip install -r requirements.txt,
+   uvicorn app.main:app --reload
+
+## Done when
+- Backend runs at http://localhost:8000 and /docs shows all endpoints
+- Login with OTP works (OTP visible in backend console in TEST_MODE)
+- Adding contacts works
+- Confirming a police complaint creates a row in the alerts table
+  and logs a TEST MODE SMS for each contact
+
+Do not start Phase 5.

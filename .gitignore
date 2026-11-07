@@ -25,3 +25,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+backend/.env
+backend/venv/
+backend/aegis.db
+backend/**/__pycache__/

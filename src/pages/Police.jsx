@@ -74,7 +74,9 @@ export default function Police() {
       <main className="mx-auto flex min-h-svh w-full max-w-[430px] flex-col bg-bg px-5 pb-5 pt-5 text-center">
         <div className="mt-12 rounded-lg border border-slate-200 bg-white px-5 py-8 shadow-sm">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sos text-3xl font-bold text-white">✓</div>
-          <h1 className="mt-5 text-xl font-bold text-aegis">Complaint registered (saved locally)</h1>
+          <h1 className="mt-5 text-xl font-bold text-aegis">
+            {savedAlert.offline ? 'Saved offline, will not notify contacts' : 'Complaint registered (saved locally)'}
+          </h1>
           <p className="mt-3 text-sm text-slate-600">Alert ID</p>
           <p className="mt-1 break-all font-mono text-xs text-slate-800">{savedAlert.id}</p>
           {savedAlert.testMode && (
