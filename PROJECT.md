@@ -176,4 +176,38 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - Confirming a police complaint creates a row in the alerts table
   and logs a TEST MODE SMS for each contact
 
-Do not start Phase 5.
+---
+
+# PHASE 5: Ambulance flow
+
+## Steps
+1. Refactor for reuse: extract the shared parts of the Police flow into reusable
+   components (StepIndicator, ConfirmScreen, SuccessScreen, NearbyPlacesList)
+   so Police and Ambulance both use them. Police must keep working exactly as before.
+2. Create src/data/medicalTypes.js (id, label, icon):
+   Accident / injury, Unconscious / not responding, Breathing problem,
+   Chest pain, Severe bleeding, Pregnancy emergency, Other medical emergency.
+3. Rewrite Ambulance.jsx as a 3-step flow:
+   Step 1: Location, Step 2: Choose emergency type, Step 3: Confirm.
+4. Always show big buttons: "Call 108" (tel:108), "Call 102" (tel:102),
+   "Call 112" (tel:112).
+5. Nearest hospitals: extend src/services/places.js with a function that queries
+   Overpass for amenity=hospital within 5 km (also try amenity=clinic if few results),
+   sorted by distance. Show top 3 with distance, "Navigate" (Google Maps link)
+   and "Call" if a phone tag exists.
+6. On confirm: call sendAlert with type "ambulance" and the emergency type as
+   category. Reuse the Phase 4 backend flow (saves alert, SMS to trusted contacts
+   with Maps link, TEST_MODE respected). Success screen text:
+   "Help alert sent to your trusted contacts. Call 108 now."
+7. Add an optional field on the confirm screen: "Patient details" (short text).
+   Include it in the alert message.
+8. Mobile-first, blue ambulance theme (#2563EB), same Aegis branding.
+
+## Done when
+- Ambulance flow works end to end like Police
+- Nearest hospitals list appears
+- Alert with type "ambulance" is saved in the DB and TEST MODE SMS is logged
+- Police flow still works
+- npm run build and npm run lint pass
+
+Do not start Phase 6.
