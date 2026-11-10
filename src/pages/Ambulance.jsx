@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import MicButton from '../components/MicButton'
 import useLocation from '../hooks/useLocation'
+import useVoice from '../hooks/useVoice'
 import LocationCard from '../components/LocationCard'
 import StepIndicator from '../components/StepIndicator'
 import IncidentPicker from '../components/IncidentPicker'
 import { medicalTypes } from '../data/medicalTypes'
+import { ambulanceEmergencyKeywords } from '../data/voiceKeywords'
 import { getNearbyHospitals } from '../services/places'
 import NearbyPlacesList from '../components/NearbyPlacesList'
 import ConfirmScreen from '../components/ConfirmScreen'
@@ -14,6 +17,7 @@ import { sendAlert } from '../services/alerts'
 export default function Ambulance() {
   const navigate = useNavigate()
   const { position, status, error, requestLocation } = useLocation()
+  const voice = useVoice()
   const [step, setStep] = useState(1)
   const [selectedEmergency, setSelectedEmergency] = useState(null)
   const [places, setPlaces] = useState([])
@@ -24,6 +28,27 @@ export default function Ambulance() {
   useEffect(() => {
     requestLocation()
   }, [requestLocation])
+
+  const detectedEmergency = useMemo(() => {
+    if (!voice.transcript) return null
+
+    const transcript = voice.transcript.toLowerCase()
+    return medicalTypes.find((emergency) => {
+      const keywords = ambulanceEmergencyKeywords[emergency.label] || []
+      return keywords.some((keyword) => transcript.includes(keyword.toLowerCase()))
+    })
+  }, [voice.transcript])
+
+  useEffect(() => {
+    if (!detectedEmergency || detectedEmergency.id === selectedEmergency?.id) return
+
+    const timer = window.setTimeout(() => {
+      setSelectedEmergency(detectedEmergency)
+      voice.stop()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [detectedEmergency, selectedEmergency, voice])
 
   useEffect(() => {
     if (!position || status !== 'granted') return
@@ -106,7 +131,23 @@ export default function Ambulance() {
       )}
       {step === 2 && (
         <section className="mt-4">
-          <h2 className="mb-3 text-lg font-bold text-aegis">What is the emergency?</h2>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-lg font-bold text-aegis">What is the emergency?</h2>
+            <MicButton
+              listening={voice.listening}
+              transcript={voice.transcript}
+              supported={voice.supported}
+              language={voice.language}
+              onToggle={() => {
+                if (voice.listening) voice.stop()
+                else voice.start()
+              }}
+              onLanguageChange={voice.setLanguage}
+            />
+          </div>
+          {selectedEmergency && (
+            <p className="mb-2 text-xs font-medium text-slate-600">Detected: {selectedEmergency.label}</p>
+          )}
           <IncidentPicker incidents={medicalTypes} selectedId={selectedEmergency?.id} onSelect={setSelectedEmergency} />
           <button
             type="button"

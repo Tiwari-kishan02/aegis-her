@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import MicButton from '../components/MicButton'
 import useLocation from '../hooks/useLocation'
+import useVoice from '../hooks/useVoice'
 import LocationCard from '../components/LocationCard'
 import StepIndicator from '../components/StepIndicator'
 import IncidentPicker from '../components/IncidentPicker'
 import { incidentTypes } from '../data/incidentTypes'
+import { policeIncidentKeywords } from '../data/voiceKeywords'
 import { getNearbyPoliceStations } from '../services/places'
 import NearbyPlacesList from '../components/NearbyPlacesList'
 import ConfirmScreen from '../components/ConfirmScreen'
@@ -15,6 +18,7 @@ import { sendAlert } from '../services/alerts'
 export default function Police() {
   const navigate = useNavigate()
   const { position, status, error, requestLocation } = useLocation()
+  const voice = useVoice()
   const [step, setStep] = useState(1)
   const [selectedIncident, setSelectedIncident] = useState(null)
   const [stations, setStations] = useState([])
@@ -25,6 +29,27 @@ export default function Police() {
   useEffect(() => {
     requestLocation()
   }, [requestLocation])
+
+  const detectedIncident = useMemo(() => {
+    if (!voice.transcript) return null
+
+    const transcript = voice.transcript.toLowerCase()
+    return incidentTypes.find((incident) => {
+      const keywords = policeIncidentKeywords[incident.label] || []
+      return keywords.some((keyword) => transcript.includes(keyword.toLowerCase()))
+    })
+  }, [voice.transcript])
+
+  useEffect(() => {
+    if (!detectedIncident || detectedIncident.id === selectedIncident?.id) return
+
+    const timer = window.setTimeout(() => {
+      setSelectedIncident(detectedIncident)
+      voice.stop()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [detectedIncident, selectedIncident, voice])
 
   useEffect(() => {
     if (!position || status !== 'granted') return
@@ -112,7 +137,23 @@ export default function Police() {
 
       {step === 2 && (
         <section className="mt-4">
-          <h2 className="mb-3 text-lg font-bold text-aegis">What happened?</h2>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-lg font-bold text-aegis">What happened?</h2>
+            <MicButton
+              listening={voice.listening}
+              transcript={voice.transcript}
+              supported={voice.supported}
+              language={voice.language}
+              onToggle={() => {
+                if (voice.listening) voice.stop()
+                else voice.start()
+              }}
+              onLanguageChange={voice.setLanguage}
+            />
+          </div>
+          {selectedIncident && (
+            <p className="mb-2 text-xs font-medium text-slate-600">Detected: {selectedIncident.label}</p>
+          )}
           <IncidentPicker incidents={incidentTypes} selectedId={selectedIncident?.id} onSelect={setSelectedIncident} />
           <button
             type="button"

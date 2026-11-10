@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Clock3, Navigation, ShieldCheck } from 'lucide-react'
 import { Marker, Polyline } from 'react-leaflet'
 import { useNavigate } from 'react-router-dom'
+import MicButton from '../components/MicButton'
 import LocationCard from '../components/LocationCard'
 import MapView from '../components/MapView'
 import StepIndicator from '../components/StepIndicator'
 import useLocation from '../hooks/useLocation'
+import useVoice from '../hooks/useVoice'
 import { searchPlaces } from '../services/geocode'
 import { openRideLink } from '../services/rideLinks'
 import { sendAlert } from '../services/alerts'
@@ -26,6 +28,7 @@ function getDirectDistanceKm(start, end) {
 export default function Cab() {
   const navigate = useNavigate()
   const { position, status, error, requestLocation } = useLocation()
+  const voice = useVoice()
   const [step, setStep] = useState(1)
   const [pickup, setPickup] = useState(null)
   const [pickupQuery, setPickupQuery] = useState('')
@@ -197,6 +200,35 @@ export default function Cab() {
     }, 500)
   }
 
+  useEffect(() => {
+    if (!voice.transcript) return
+
+    const transcript = voice.transcript.trim()
+    if (!transcript) return
+
+    const normalized = transcript.toLowerCase()
+    if (step === 2) {
+      const findAutocomplete = async () => {
+        const results = await searchPlaces(transcript)
+        if (results[0]) {
+          setDestination({
+            lat: Number(results[0].lat),
+            lng: Number(results[0].lng),
+            displayName: results[0].displayName,
+            label: results[0].displayName,
+          })
+          setDestinationQuery(results[0].displayName)
+          setDestinationSuggestions([])
+          voice.stop()
+        }
+      }
+
+      if (!normalized.includes('cancel') && !normalized.includes('skip')) {
+        findAutocomplete()
+      }
+    }
+  }, [step, voice])
+
   const handleBack = () => {
     if (step === 1) navigate(-1)
     else setStep((currentStep) => currentStep - 1)
@@ -302,9 +334,22 @@ export default function Cab() {
   const renderStepTwo = () => (
     <section className="mt-4 space-y-4">
       <div className="rounded-lg border border-slate-200 bg-white p-3">
-        <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-          Destination
-        </label>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Destination
+          </label>
+          <MicButton
+            listening={voice.listening}
+            transcript={voice.transcript}
+            supported={voice.supported}
+            language={voice.language}
+            onToggle={() => {
+              if (voice.listening) voice.stop()
+              else voice.start()
+            }}
+            onLanguageChange={voice.setLanguage}
+          />
+        </div>
         <input
           type="text"
           value={destinationQuery}

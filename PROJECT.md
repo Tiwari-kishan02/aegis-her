@@ -254,4 +254,41 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - Police and Ambulance flows still work
 - npm run build and npm run lint pass
 
-Do not start Phase 7.
+---
+
+# PHASE 7: Voice input
+
+## Steps
+1. Create src/hooks/useVoice.js using the Web Speech API
+   (SpeechRecognition / webkitSpeechRecognition):
+   - Returns { listening, transcript, supported, error, start, stop, language, setLanguage }
+   - Languages: "hi-IN", "en-IN", "mr-IN"
+   - Handles permission denied, no speech detected, and unsupported browsers.
+2. Update MicButton.jsx: now real. Tap to start, tap again to stop,
+   pulsing animation while listening, shows the live transcript, and a small
+   language switch (HI / EN / MR). Remember the last language in localStorage.
+3. Use voice in all three blocks:
+   - Police: speak the location/landmark OR say the incident
+     (match keywords like "peecha", "chori", "kidnap", "marpeet", "chhed" and
+     English equivalents to the incident types, then ask the user to confirm).
+   - Ambulance: speak the location or emergency type
+     (keywords like "accident", "saans", "seene mein dard", "khoon").
+   - Cab: speak the destination.
+4. Speech to place: send the transcript to the Nominatim geocoder from Phase 6,
+   show the top results, drop a pin on the map and ask "Is this correct?"
+   Always require the user to confirm before it is used.
+5. Home page mic buttons: speaking "police", "ambulance" or "cab"
+   (Hindi and English, e.g. "police bulao", "ambulance chahiye", "cab book karo")
+   opens the matching block.
+6. If speech is unsupported (e.g. some iOS browsers), hide the mic and show a
+   small hint to type instead. Nothing should break without voice.
+7. Keep keyword lists in src/data/voiceKeywords.js so they are easy to edit.
+
+## Done when
+- Mic works in Chrome (Android and desktop) in Hindi and English
+- Spoken destination/location is geocoded, shown on the map and confirmed
+- Home mic opens the right block
+- Typing still works everywhere
+- npm run build and npm run lint pass
+
+Do not start Phase 8.

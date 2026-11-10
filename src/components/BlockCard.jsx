@@ -1,10 +1,27 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { homeVoiceCommands } from '../data/voiceKeywords'
+import useVoice from '../hooks/useVoice'
 import MicButton from './MicButton'
 
 export default function BlockCard({ title, description, icon: Icon, color, to }) {
   const navigate = useNavigate()
+  const voice = useVoice()
 
   const openCard = () => navigate(to)
+
+  useEffect(() => {
+    if (!voice.transcript) return
+
+    const normalized = voice.transcript.toLowerCase().trim()
+    const routeKey = title === 'Safe Cab' ? 'cab' : title.toLowerCase()
+    const matches = homeVoiceCommands[routeKey] || []
+
+    if (matches.some((phrase) => normalized.includes(phrase))) {
+      voice.stop()
+      navigate(to)
+    }
+  }, [navigate, title, to, voice])
 
   return (
     <div
@@ -32,7 +49,17 @@ export default function BlockCard({ title, description, icon: Icon, color, to })
         className="shrink-0"
         onClick={(event) => event.stopPropagation()}
       >
-        <MicButton />
+        <MicButton
+          listening={voice.listening}
+          transcript={voice.transcript}
+          supported={voice.supported}
+          language={voice.language}
+          onToggle={() => {
+            if (voice.listening) voice.stop()
+            else voice.start()
+          }}
+          onLanguageChange={voice.setLanguage}
+        />
       </span>
     </div>
   )
