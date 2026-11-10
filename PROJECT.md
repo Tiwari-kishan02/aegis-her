@@ -210,4 +210,48 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - Police flow still works
 - npm run build and npm run lint pass
 
-Do not start Phase 6.
+---
+
+# PHASE 6: Safe Cab flow
+
+## Steps
+1. Add a geocoding service in src/services/geocode.js using Nominatim
+   (OpenStreetMap): searchPlaces(query) with a 500ms debounce, India-biased
+   (countrycodes=in), and reverseGeocode(lat, lng). Send a proper User-Agent/
+   Referer-friendly request and respect rate limits (1 request per second).
+2. Rewrite Cab.jsx as a 4-step flow using the shared components from Phase 5:
+   Step 1: Pickup = current location (LocationCard, editable via search).
+   Step 2: Destination search with autocomplete suggestions list.
+   Step 3: Route preview on the map (pickup and drop markers, straight line or
+           OSRM public API route), distance and rough ETA.
+   Step 4: Book options, see below.
+3. Book options (no real Uber/Ola API exists for third parties, so use deep links):
+   buttons "Open Uber", "Open Ola", "Open Rapido" that open each app/site with
+   pickup and drop coordinates prefilled using their documented deep-link/URL
+   formats. Put all link builders in src/services/rideLinks.js. If a link format
+   is uncertain, fall back to opening the app's website with a comment explaining.
+   Add a note: "Compare prices in each app, then book."
+4. Late-night safety: after the user taps a ride button, show a "Share my ride"
+   form: driver name, vehicle number, cab company (all optional) and
+   "Notify trusted contacts" button.
+5. Notifying contacts: call sendAlert with type "cab", category "ride_shared",
+   including destination, driver name and vehicle number in the message.
+   Backend (alerts route and sms.py) must include these in the SMS with the live
+   location link. TEST_MODE rule still applies. Update the alerts table or
+   add a JSON "details" column for extra fields (handle the migration safely
+   for the existing SQLite DB).
+6. Add a "Journey timer": user picks expected arrival (30 min, 1h, custom).
+   If they do not tap "I reached safely" before the timer ends, show a
+   countdown warning for 60 seconds and then automatically send an alert
+   (type "cab", category "no_checkin") to trusted contacts.
+7. Mobile-first, amber theme (#F59E0B), Aegis branding, simple commented code.
+
+## Done when
+- Destination search suggests places and shows the route on the map
+- The three ride buttons open with pickup/drop prefilled (or fall back gracefully)
+- Share ride sends a TEST MODE SMS with driver details and location link
+- Journey timer triggers the no-check-in alert
+- Police and Ambulance flows still work
+- npm run build and npm run lint pass
+
+Do not start Phase 7.

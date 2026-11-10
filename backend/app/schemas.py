@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -35,6 +36,7 @@ class AlertCreate(BaseModel):
     lat: float
     lng: float
     accuracy: float
+    details: dict[str, Any] | None = None
 
 
 class AlertResponse(BaseModel):
@@ -45,4 +47,5 @@ class AlertResponse(BaseModel):
     lng: float
     accuracy: float
     status: str
+    details: str | None = None
     created_at: datetime

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -40,6 +40,7 @@ class Alert(Base):
     lng: Mapped[float] = mapped_column(Float)
     accuracy: Mapped[float] = mapped_column(Float)
     status: Mapped[str] = mapped_column(String(20), default="saved")
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="alerts")
