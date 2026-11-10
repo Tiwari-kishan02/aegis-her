@@ -291,4 +291,49 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - Typing still works everywhere
 - npm run build and npm run lint pass
 
-Do not start Phase 8.
+---
+
+# PHASE 8: Admin dashboard, polish and deployment
+
+## Steps
+1. Backend admin access: add ADMIN_PHONES (comma separated) in .env.
+   Add GET /admin/alerts (filters: type, date range, status) and
+   GET /admin/stats (counts by type and by day). Only users whose phone is in
+   ADMIN_PHONES can call these (403 otherwise).
+2. Frontend admin page at /admin (hidden from normal users):
+   - Stats cards (total alerts, by type), filters, alerts table
+   - Map with alert markers (colored by type) and a heatmap layer using
+     leaflet.heat, plus a toggle between markers and heatmap
+   - Mark alert status: new, acknowledged, resolved (PATCH /admin/alerts/{id})
+3. Alert history: user-facing /history page showing the user's own alerts.
+4. Offline and error handling: if the backend is unreachable, queue alerts in
+   localStorage and retry automatically when back online. Show a clear
+   offline banner. Make sure the service worker caches the app shell.
+5. Polish: loading skeletons, empty states, consistent error messages,
+   accessibility (aria-labels, focus states, contrast), a short onboarding
+   screen for first launch (3 slides: what Aegis does, add trusted contacts,
+   how to use SOS), and a visible "TEST MODE" badge when enabled.
+6. Deployment prep:
+   - Frontend: Vercel config, VITE_API_URL from env
+   - Backend: Dockerfile, requirements, start command for Render,
+     DATABASE_URL for PostgreSQL (Neon or Supabase free tier),
+     CORS origins from env
+   - GitHub Actions workflow: run lint and build on every push (frontend),
+     and a basic backend import/test check
+   - docker-compose.yml for local backend + PostgreSQL
+7. Documentation: rewrite README.md with project overview, features, tech stack,
+   architecture diagram (Mermaid), screenshots placeholders, setup steps,
+   env variables table, API endpoint list, security/privacy notes,
+   and a "Limitations" section (no direct police API integration, uses 112/108
+   helplines and trusted-contact alerts).
+8. Add a basic privacy note in the app footer: what location data is stored,
+   and a "Delete my data" button (DELETE /me) that removes the user,
+   contacts and alerts.
+
+## Done when
+- /admin works only for admin phones, with table, map and heatmap
+- Offline queue works (test by switching DevTools to Offline)
+- npm run build and npm run lint pass, GitHub Actions is green
+- README is complete
+
+Do not add new features after this phase.

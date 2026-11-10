@@ -39,6 +39,10 @@ class AlertCreate(BaseModel):
     details: dict[str, Any] | None = None
 
 
+class AlertStatusUpdate(BaseModel):
+    status: str
+
+
 class AlertResponse(BaseModel):
     id: str
     type: str

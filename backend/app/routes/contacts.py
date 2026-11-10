@@ -3,11 +3,12 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Contact, User
+from ..models import Alert, Contact, User
 from ..routes.auth import JWT_ALGORITHM, JWT_SECRET, normalize_phone
 from ..schemas import ContactCreate, ContactResponse
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
+me_router = APIRouter(tags=["me"])
 
 
 def current_user(authorization: str | None = Header(default=None), db: Session = Depends(get_db)):
@@ -40,6 +41,14 @@ def add_contact(payload: ContactCreate, db: Session = Depends(get_db), user: Use
     db.commit()
     db.refresh(contact)
     return contact
+
+
+@me_router.delete("/me", status_code=204)
+def delete_my_data(db: Session = Depends(get_db), user: User = Depends(current_user)):
+    db.query(Contact).filter(Contact.user_id == user.id).delete()
+    db.query(Alert).filter(Alert.user_id == user.id).delete()
+    db.delete(user)
+    db.commit()
 
 
 @router.delete("/{contact_id}", status_code=204)
