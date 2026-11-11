@@ -66,7 +66,7 @@ export async function sendAlert(alert) {
 
     return {
       success: true,
-      id: result.id,
+      id: result?.id || nextAlert.id,
       offline: false,
       testMode: import.meta.env.VITE_TEST_MODE === 'true',
     }

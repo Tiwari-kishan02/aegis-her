@@ -1,6 +1,7 @@
 import { ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api, getToken } from '../services/api'
+import { signOut } from '../services/supabase'
 
 export default function GlobalFooter() {
   const navigate = useNavigate()
@@ -10,7 +11,7 @@ export default function GlobalFooter() {
 
     try {
       await api('/me', { method: 'DELETE' })
-      localStorage.removeItem('aegis_token')
+      await signOut()
       navigate('/login')
     } catch {
       localStorage.removeItem('aegis_token')

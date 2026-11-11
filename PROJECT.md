@@ -336,4 +336,60 @@ Common flow: tap block -> location permission -> details -> Confirm screen -> al
 - npm run build and npm run lint pass, GitHub Actions is green
 - README is complete
 
+---
+
+# PHASE 9: Migrate backend from FastAPI to Supabase
+
+Goal: the app must run with NO custom server. Frontend (GitHub Pages) talks
+directly to Supabase using @supabase/supabase-js.
+
+## Steps
+1. Install @supabase/supabase-js. Create src/services/supabase.js using
+   VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY. Update .env.example.
+2. Create supabase/schema.sql (one file I can paste into the Supabase SQL Editor):
+   - profiles (id uuid references auth.users, name, phone, is_admin boolean default false,
+     created_at). Auto-create a profile row via trigger on new auth user.
+   - contacts (id, user_id, name, phone), max 5 per user (enforce with trigger)
+   - alerts (id, user_id, type [police|ambulance|cab], category, lat, lng, accuracy,
+     status [new|acknowledged|resolved] default new, details jsonb, created_at)
+   - notifications (id, alert_id, contact_name, contact_phone, message, mode
+     default 'test', created_at)
+   - A trigger on alerts insert that creates one notifications row per trusted
+     contact of that user, message = alert type + category + details +
+     "https://maps.google.com/?q=lat,lng". No real SMS is sent (TEST MODE).
+   - Enable Row Level Security on EVERY table. Policies:
+     users read/write only their own profile, contacts, alerts;
+     users read their own notifications; admins (profiles.is_admin = true)
+     can read all alerts and notifications and update alerts.status.
+     Use a security definer helper function is_admin() to avoid recursion.
+   - A function delete_my_data() (security definer) that deletes the caller's data.
+3. Auth: replace the old OTP/JWT login with Supabase email OTP
+   (signInWithOtp with email, then verifyOtp with the 6-digit code).
+   After login ask for name and phone and save them in profiles.
+4. Replace src/services/api.js and alerts.js to use Supabase:
+   contacts CRUD, insert into alerts, history, admin queries (stats by type and
+   by day, filters, status update), and delete account data via rpc delete_my_data.
+5. Keep the offline queue: if offline or request fails, queue in localStorage and
+   retry when back online. Keep the TEST MODE badge, and show in the success screen
+   that contacts were "notified (test mode)".
+6. Admin page: only visible if profile.is_admin; reads from Supabase;
+   keep map, heatmap, filters and status buttons. Show the notifications log
+   so the demo can prove what each contact would have received.
+7. GitHub Pages: auth redirect should use the Pages URL
+   https://tiwari-kishan02.github.io/aegis-her/ (HashRouter-safe).
+   Update the deploy workflow to pass VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+   from GitHub Actions repository variables. Remove VITE_API_URL usage.
+8. Move the old FastAPI code to /legacy-backend-fastapi (do not delete) and mention
+   in README that the app now uses Supabase. Update README architecture diagram
+   and env table.
+9. Write supabase/README.md with exact steps for: running schema.sql, enabling
+   email auth, setting Auth URL configuration, and making a user admin.
+
+## Done when
+- No FastAPI needed, app works with only Supabase
+- RLS enabled on all tables, one user cannot see another user's alerts
+- Police, Ambulance, Cab alerts create rows in alerts and notifications
+- Admin dashboard works only for is_admin users
+- npm run build and npm run lint pass
+
 Do not add new features after this phase.
