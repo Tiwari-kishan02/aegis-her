@@ -94,7 +94,7 @@ export default function Police() {
       timestamp: now,
     }
     const result = await sendAlert(alert)
-    setSavedAlert(result)
+    setSavedAlert({ ...result, shareData: alert })
     setStep(4)
   }
 

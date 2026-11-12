@@ -92,7 +92,7 @@ export default function Ambulance() {
       patientDetails: details || '',
     }
     const result = await sendAlert(alert)
-    setSavedAlert(result)
+    setSavedAlert({ ...result, shareData: alert })
     setStep(4)
   }
 

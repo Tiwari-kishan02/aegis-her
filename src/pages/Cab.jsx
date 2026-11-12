@@ -11,6 +11,7 @@ import useVoice from '../hooks/useVoice'
 import { searchPlaces } from '../services/geocode'
 import { openRideLink } from '../services/rideLinks'
 import { sendAlert } from '../services/alerts'
+import TrustedContactShare from '../components/TrustedContactShare'
 
 const rideProviders = ['Uber', 'Ola', 'Rapido']
 
@@ -281,7 +282,7 @@ export default function Cab() {
     }
 
     const result = await sendAlert(alert)
-    setShareAlert(result)
+    setShareAlert({ ...result, shareData: alert })
   }
 
   const renderStepOne = () => (
@@ -538,9 +539,12 @@ export default function Cab() {
           </div>
 
           {shareAlert && (
-            <p className="mt-3 text-sm font-medium text-emerald-700">
-              Ride shared successfully. Alert id: {shareAlert.id}
-            </p>
+            <>
+              <p className="mt-3 text-sm font-medium text-emerald-700">
+                Ride shared successfully. Alert id: {shareAlert.id}
+              </p>
+              <TrustedContactShare alert={shareAlert.shareData} />
+            </>
           )}
         </div>
       )}

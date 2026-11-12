@@ -1,3 +1,5 @@
+import TrustedContactShare from './TrustedContactShare'
+
 export default function SuccessScreen({ alert, onBack, type = 'police' }) {
   const isOffline = alert?.offline
   const isTest = alert?.testMode
@@ -20,6 +22,7 @@ export default function SuccessScreen({ alert, onBack, type = 'police' }) {
           </div>
         )}
       </div>
+      {alert?.shareData && <TrustedContactShare alert={alert.shareData} />}
       <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
         {type === 'ambulance' ? (
           <>

@@ -39,6 +39,9 @@ export default function Home() {
         </div>
       </section>
       <footer className="px-5 pb-5 pt-2 text-center text-sm text-slate-600">
+        <p className="mb-2">
+          Aegis is a demo project and does not contact police directly. In an emergency call 112.
+        </p>
         In immediate danger?{' '}
         <a className="font-bold text-sos underline underline-offset-2" href="tel:112">
           Call 112
