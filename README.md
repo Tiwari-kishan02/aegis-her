@@ -17,7 +17,7 @@ Aegis is a mobile-first women safety PWA for rapid emergency response, trusted-c
 - Frontend: React 19, Vite, Tailwind CSS, React Router, Leaflet, PWA
 - Backend: Supabase Postgres + Row Level Security + Auth + Storage
 - Notifications: demo alert records generated in Supabase (TEST MODE)
-- Deployment: Vercel / GitHub Pages with Supabase environment variables
+- Deployment: GitHub Pages at [aegis.kishantech.me](https://aegis.kishantech.me/) with Supabase environment variables
 
 ## Architecture
 
@@ -46,7 +46,7 @@ npm run dev
 1. Create a project in Supabase.
 2. Open SQL Editor and run `supabase/schema.sql`.
 3. Enable Email authentication in Authentication -> Providers.
-4. Add your site URL and redirect URL to the GitHub Pages URL or localhost.
+4. Add `https://aegis.kishantech.me/` and `http://localhost:5173/` to the allowed redirect URLs.
 5. Copy `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` into `.env`.
 
 ## Environment variables
@@ -86,7 +86,8 @@ RLS is enabled on every table and admin access is controlled by the `profiles.is
 ### Frontend on GitHub Pages or Vercel
 
 - Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables.
-- For GitHub Pages, use the Pages URL in Auth redirect settings.
+- GitHub Pages serves the app from the root of `https://aegis.kishantech.me/`; the custom domain is configured by `public/CNAME`.
+- Add `https://aegis.kishantech.me/` and `http://localhost:5173/` to Supabase Auth's allowed redirect URLs.
 
 ### Supabase configuration
 

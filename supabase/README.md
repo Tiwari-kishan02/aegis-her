@@ -9,15 +9,15 @@ Open your Supabase project SQL Editor and paste the contents of `../supabase/sch
 - Open Supabase Dashboard -> Authentication -> Providers.
 - Turn on Email.
 - Set `Enable email confirmations` to `Off` for local demo use.
-- Add your `http://localhost:5173` and GitHub Pages URL to redirect URLs.
+- Add `http://localhost:5173/` and `https://aegis.kishantech.me/` to the allowed redirect URLs.
 
 ## 3) Configure redirect URLs
 
 Use these examples:
 
 - `http://localhost:5173/`
-- `https://tiwari-kishan02.github.io/aegis-her/`
-- `https://tiwari-kishan02.github.io/aegis-her/#/login`
+- `https://aegis.kishantech.me/`
+- `https://aegis.kishantech.me/#/login`
 
 ## 4) Make a user admin
 

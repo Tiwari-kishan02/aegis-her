@@ -375,8 +375,8 @@ directly to Supabase using @supabase/supabase-js.
 6. Admin page: only visible if profile.is_admin; reads from Supabase;
    keep map, heatmap, filters and status buttons. Show the notifications log
    so the demo can prove what each contact would have received.
-7. GitHub Pages: auth redirect should use the Pages URL
-   https://tiwari-kishan02.github.io/aegis-her/ (HashRouter-safe).
+7. GitHub Pages: deploy at the root of https://aegis.kishantech.me/
+   with HashRouter-safe auth redirects.
    Update the deploy workflow to pass VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
    from GitHub Actions repository variables. Remove VITE_API_URL usage.
 8. Move the old FastAPI code to /legacy-backend-fastapi (do not delete) and mention

@@ -34,7 +34,7 @@ export async function signInWithOtp(email) {
     email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: 'https://tiwari-kishan02.github.io/aegis-her/',
+      emailRedirectTo: `${window.location.origin}/`,
     },
   })
 
