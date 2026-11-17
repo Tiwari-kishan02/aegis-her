@@ -363,8 +363,16 @@ directly to Supabase using @supabase/supabase-js.
      can read all alerts and notifications and update alerts.status.
      Use a security definer helper function is_admin() to avoid recursion.
    - A function delete_my_data() (security definer) that deletes the caller's data.
-3. Auth: replace the old OTP/JWT login with Supabase email OTP
-   (signInWithOtp with email, then verifyOtp with the 6-digit code).
+3. Auth: replace the old OTP/JWT login with Supabase email OTP:
+   - Step 1: validate the email format before sending, then call
+     supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } }).
+     Disable the send button while the request is in progress. After a successful
+     send, show "Check your spam folder", enforce a 60-second resend cooldown,
+     and show a visible countdown. For rate-limit errors, show
+     "Too many requests, please wait and try again".
+   - Step 2: ask for a 6-digit code, then call
+     supabase.auth.verifyOtp({ email, token, type: 'email' }).
+     For invalid or expired codes, show "Wrong or expired code".
    After login ask for name and phone and save them in profiles.
 4. Replace src/services/api.js and alerts.js to use Supabase:
    contacts CRUD, insert into alerts, history, admin queries (stats by type and

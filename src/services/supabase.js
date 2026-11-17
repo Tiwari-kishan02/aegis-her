@@ -34,12 +34,11 @@ export async function signInWithOtp(email) {
     email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: `${window.location.origin}/`,
     },
   })
 
   if (error) {
-    throw new Error(error.message)
+    throw error
   }
 
   return true
@@ -57,7 +56,7 @@ export async function verifyOtp({ email, token }) {
   })
 
   if (error) {
-    throw new Error(error.message)
+    throw error
   }
 
   if (data.session?.access_token) {
